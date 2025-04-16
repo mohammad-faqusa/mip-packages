@@ -1,3 +1,3 @@
 # mypackage/__init__.py
 
-from .helper import LEDController
+from helper import LEDController
