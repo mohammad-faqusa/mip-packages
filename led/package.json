@@ -1,7 +1,7 @@
 {
   "version": "1.0.0",
   "files": [
-    "mypackage/__init__.py",
-    "mypackage/helper.py"
+    "./__init__.py",
+    "./helper.py"
   ]
 }
