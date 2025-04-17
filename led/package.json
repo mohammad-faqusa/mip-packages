@@ -1,7 +1,7 @@
 {
   "version": "1.0.0",
-  "files": [
-    "mypackage/__init__.py",
-    "mypackage/helper.py"
+  "urls": [
+    ["mypackage/__init__.py", "https://raw.githubusercontent.com/mohammad0faqusa/mip-packages/main/led/mypackage/__init__.py"],
+    ["mypackage/helper.py", "https://raw.githubusercontent.com/mohammad0faqusa/mip-packages/main/led/mypackage/helper.py"]
   ]
 }
