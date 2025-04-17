@@ -3,11 +3,11 @@
   "urls": [
     [
       "servo/__init__.py",
-      "https://raw.githubusercontent.com/mohammad0faqusa/mip-peripherals/main/servo/servo/__init__.py"
+      "https://raw.githubusercontent.com/mohammad0faqusa/mip-packages/main/servo/servo/__init__.py"
     ],
     [
       "servo/driver.py",
-      "https://raw.githubusercontent.com/mohammad0faqusa/mip-peripherals/main/servo/servo/driver.py"
+      "https://raw.githubusercontent.com/mohammad0faqusa/mip-packages/main/servo/servo/driver.py"
     ]
   ]
 }
