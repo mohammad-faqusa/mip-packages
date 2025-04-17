@@ -1,0 +1,13 @@
+{
+  "version": "1.0.0",
+  "urls": [
+    [
+      "dht/__init__.py",
+      "https://raw.githubusercontent.com/mohammad0faqusa/mip-packages/main/dht/dht/__init__.py"
+    ],
+    [
+      "dht/driver.py",
+      "https://raw.githubusercontent.com/mohammad0faqusa/mip-packages/main/dht/dht/driver.py"
+    ]
+  ]
+}
