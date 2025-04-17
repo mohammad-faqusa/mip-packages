@@ -1,0 +1,13 @@
+{
+  "version": "1.0.0",
+  "urls": [
+    [
+      "servo/__init__.py",
+      "https://raw.githubusercontent.com/yourusername/mip-peripherals/main/servo/servo/__init__.py"
+    ],
+    [
+      "servo/driver.py",
+      "https://raw.githubusercontent.com/yourusername/mip-peripherals/main/servo/servo/driver.py"
+    ]
+  ]
+}
