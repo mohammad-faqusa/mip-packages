@@ -1,0 +1,13 @@
+{
+  "version": "1.0.0",
+  "urls": [
+    [
+      "encoder/__init__.py",
+      "github:mohammad0faqusa/mip-packages/encoder/encoder/__init__.py"
+    ],
+    [
+      "encoder/driver.py",
+      "github:mohammad0faqusa/mip-packages/encoder/encoder/driver.py"
+    ]
+  ]
+}
