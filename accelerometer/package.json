@@ -1,0 +1,13 @@
+{
+  "version": "1.0.0",
+  "urls": [
+    [
+      "accelerometer/__init__.py",
+      "github:mohammad0faqusa/mip-packages/accelerometer/accelerometer/__init__.py"
+    ],
+    [
+      "accelerometer/driver.py",
+      "github:mohammad0faqusa/mip-packages/accelerometer/accelerometer/driver.py"
+    ]
+  ]
+}
