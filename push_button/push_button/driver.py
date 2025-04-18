@@ -8,6 +8,7 @@ class PushButton:
         self._last_state = False
         self._last_time = time.ticks_ms()
         self._simulated_state = False  # Controlled manually by the user
+        self.was_pressed = False
 
         if not self.simulate:
             from machine import Pin
@@ -34,6 +35,21 @@ class PushButton:
             if time.ticks_diff(current_time, self._last_time) > self.debounce_ms:
                 self._last_time = current_time
                 self._last_state = current_state
+                self.was_pressed = True
                 print(f"[DETECTED] Button {'PRESSED' if current_state else 'RELEASED'}")
 
         return self._last_state
+    
+    def push(self):
+        self.set_simulated_state(True)
+        self.is_pressed()
+        self.set_simulated_state(False)
+        self.is_pressed()
+    
+    def get_event(self):
+        """Returns and clears the was_pressed flag."""
+        if self.was_pressed: 
+            self.was_pressed = False
+            return True
+        return False
+
