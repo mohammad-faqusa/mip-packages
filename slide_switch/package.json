@@ -1,0 +1,13 @@
+{
+  "version": "1.0.0",
+  "urls": [
+    [
+      "slide_switch/__init__.py",
+      "github:mohammad0faqusa/mip-packages/slide_switch/slide_switch/__init__.py"
+    ],
+    [
+      "slide_switch/driver.py",
+      "github:mohammad0faqusa/mip-packages/slide_switch/slide_switch/driver.py"
+    ]
+  ]
+}
