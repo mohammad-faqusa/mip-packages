@@ -1,7 +1,13 @@
 {
   "version": "1.0.0",
   "urls": [
-    ["mypackage/__init__.py", "https://raw.githubusercontent.com/mohammad0faqusa/mip-packages/main/led/mypackage/__init__.py"],
-    ["mypackage/helper.py", "https://raw.githubusercontent.com/mohammad0faqusa/mip-packages/main/led/mypackage/helper.py"]
+    [
+      "led/__init__.py",
+      "github:mohammad0faqusa/mip-packages/led/led/__init__.py"
+    ],
+    [
+      "led/driver.py",
+      "github:mohammad0faqusa/mip-packages/led/led/driver.py"
+    ]
   ]
 }
