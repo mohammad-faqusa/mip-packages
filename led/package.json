@@ -8,6 +8,10 @@
     [
       "led/driver.py",
       "github:mohammad0faqusa/mip-packages/led/led/driver.py"
+    ],
+    [
+      "led/internal.py",
+      "github:mohammad0faqusa/mip-packages/led/led/internal.py"
     ]
   ]
 }
