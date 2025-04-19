@@ -322,7 +322,7 @@
   },
   {
     "name": "internal_led",
-    "library_name": "internal_led",
+    "library_name": "led",
     "class_name": "InternalLED",
     "inherited_from": "LED",
     "attributes": {

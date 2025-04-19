@@ -1,0 +1,13 @@
+{
+  "version": "1.0.0",
+  "urls": [
+    [
+      "servo_motor/__init__.py",
+      "https://raw.githubusercontent.com/mohammad0faqusa/mip-packages/main/servo_motor/servo_motor/__init__.py"
+    ],
+    [
+      "servo_motor/driver.py",
+      "https://raw.githubusercontent.com/mohammad0faqusa/mip-packages/main/servo_motor/servo_motor/driver.py"
+    ]
+  ]
+}
