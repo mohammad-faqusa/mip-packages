@@ -1,0 +1,13 @@
+{
+  "version": "1.0.0",
+  "urls": [
+    [
+      "gas_sensor/__init__.py",
+      "https://raw.githubusercontent.com/mohammad0faqusa/mip-packages/main/gas_sensor/gas_sensor/__init__.py"
+    ],
+    [
+      "gas_sensor/driver.py",
+      "https://raw.githubusercontent.com/mohammad0faqusa/mip-packages/main/gas_sensor/gas_sensor/driver.py"
+    ]
+  ]
+}
