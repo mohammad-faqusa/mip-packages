@@ -1,6 +1,17 @@
 import random
 import time
 
+class MethodWrapper:
+    def __init__(self, func):
+        self.func = func
+
+    def __getitem__(self, args):
+        if isinstance(args, (list, tuple)):
+            return self.func(*args)  # Unpack!
+        else:
+            return self.func(args)
+
+
 class MotionSensor:
     def __init__(self, pin, simulate=True):
         self.pin = pin
@@ -13,6 +24,10 @@ class MotionSensor:
 
         print(f"[INIT] MotionSensor on pin {pin} (simulate={simulate})")
 
+    def __getitem__(self, key):
+        method = getattr(self, key)
+        return MethodWrapper(method)
+    
     def read(self):
         if self.simulate:
             self._motion_detected = random.choice([True, False])

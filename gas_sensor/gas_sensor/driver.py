@@ -1,5 +1,17 @@
 import random
 
+class MethodWrapper:
+    def __init__(self, func):
+        self.func = func
+
+    def __getitem__(self, args):
+        if isinstance(args, (list, tuple)):
+            return self.func(*args)  # Unpack!
+        else:
+            return self.func(args)
+
+
+
 class GasSensor:
     def __init__(self, pin, analog=True, simulate=True):
         self.pin = pin
@@ -16,6 +28,10 @@ class GasSensor:
 
         print(f"[INIT] GasSensor on pin {pin} (analog={analog}, simulate={simulate})")
 
+    def __getitem__(self, key):
+        method = getattr(self, key)
+        return MethodWrapper(method)
+    
     def read(self):
         if self.simulate:
             self._gas_level = random.randint(0, 1023) if self.analog else random.choice([0, 1])

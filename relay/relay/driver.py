@@ -1,3 +1,13 @@
+class MethodWrapper:
+    def __init__(self, func):
+        self.func = func
+
+    def __getitem__(self, args):
+        if isinstance(args, (list, tuple)):
+            return self.func(*args)  # Unpack!
+        else:
+            return self.func(args)
+
 class Relay:
     def __init__(self, pin, active_high=True, simulate=True):
         self.pin = pin
@@ -10,6 +20,10 @@ class Relay:
             self._relay = Pin(pin, Pin.OUT)
 
         print(f"[INIT] Relay on pin {pin} (active_high={active_high}, simulate={simulate})")
+    
+    def __getitem__(self, key):
+        method = getattr(self, key)
+        return MethodWrapper(method)
 
     def on(self):
         self._state = True

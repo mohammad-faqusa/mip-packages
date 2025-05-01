@@ -1,5 +1,17 @@
 import random
 
+class MethodWrapper:
+    def __init__(self, func):
+        self.func = func
+
+    def __getitem__(self, args):
+        if isinstance(args, (list, tuple)):
+            return self.func(*args)  # Unpack!
+        else:
+            return self.func(args)
+
+
+
 class MPU6050:
     def __init__(self, i2c=None, addr=0x68, simulate=True):
         self.simulate = simulate
@@ -16,7 +28,11 @@ class MPU6050:
             except Exception as e:
                 print("[ERROR] Failed to init real MPU6050:", e)
                 self.simulate = True
-
+                
+        def __getitem__(self, key):
+                method = getattr(self, key)
+                return MethodWrapper(method)
+        
         if self.simulate:
             print(f"[INIT] Simulated MPU6050 (addr=0x{addr:X})")
 

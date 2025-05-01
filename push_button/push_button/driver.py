@@ -1,5 +1,16 @@
 import time
 
+class MethodWrapper:
+    def __init__(self, func):
+        self.func = func
+
+    def __getitem__(self, args):
+        if isinstance(args, (list, tuple)):
+            return self.func(*args)  # Unpack!
+        else:
+            return self.func(args)
+
+
 class PushButton:
     def __init__(self, pin, simulate=True, debounce_ms=50):
         self.pin = pin
@@ -15,6 +26,10 @@ class PushButton:
             self._btn = Pin(pin, Pin.IN, Pin.PULL_UP)
 
         print(f"[INIT] PushButton on pin {pin} (simulate={simulate}, debounce={debounce_ms}ms)")
+
+    def __getitem__(self, key):
+        method = getattr(self, key)
+        return MethodWrapper(method)
 
     def set_simulated_state(self, pressed: bool):
         """Only used in simulate=True mode to mock button press."""

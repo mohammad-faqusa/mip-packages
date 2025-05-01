@@ -1,5 +1,17 @@
 import random
 
+class MethodWrapper:
+    def __init__(self, func):
+        self.func = func
+
+    def __getitem__(self, args):
+        if isinstance(args, (list, tuple)):
+            return self.func(*args)  # Unpack!
+        else:
+            return self.func(args)
+
+
+
 class DHTSensor:
     def __init__(self, pin, sensor_type="DHT22", simulate=True):
         self.pin = pin
@@ -16,6 +28,10 @@ class DHTSensor:
 
         print(f"[INIT] {sensor_type} on pin {pin} (simulate={simulate})")
 
+    def __getitem__(self, key):
+        method = getattr(self, key)
+        return MethodWrapper(method)
+    
     def measure(self):
         if self.simulate:
             self._temp = round(random.uniform(20.0, 30.0), 1)       # Simulated temp

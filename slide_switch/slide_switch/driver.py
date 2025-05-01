@@ -1,3 +1,13 @@
+class MethodWrapper:
+    def __init__(self, func):
+        self.func = func
+
+    def __getitem__(self, args):
+        if isinstance(args, (list, tuple)):
+            return self.func(*args)  # Unpack!
+        else:
+            return self.func(args)
+
 class SlideSwitch:
     def __init__(self, pin, simulate=True):
         self.pin = pin
@@ -9,6 +19,10 @@ class SlideSwitch:
             self._switch = Pin(pin, Pin.IN, Pin.PULL_UP)
 
         print(f"[INIT] SlideSwitch on pin {pin} (simulate={simulate})")
+    
+    def __getitem__(self, key):
+        method = getattr(self, key)
+        return MethodWrapper(method)
 
     def set_simulated_state(self, state: bool):
         """Set simulated position (True = ON, False = OFF)"""

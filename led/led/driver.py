@@ -1,3 +1,15 @@
+class MethodWrapper:
+    def __init__(self, func):
+        self.func = func
+
+    def __getitem__(self, args):
+        if isinstance(args, (list, tuple)):
+            return self.func(*args)  # Unpack!
+        else:
+            return self.func(args)
+
+
+
 class LED:
     def __init__(self, pin, active_high=True, simulate=True):
         self.pin = pin
@@ -11,6 +23,10 @@ class LED:
 
         print(f"[INIT] LED on pin {pin} (active_high={active_high}, simulate={simulate})")
 
+    def __getitem__(self, key):
+        method = getattr(self, key)
+        return MethodWrapper(method)
+    
     def on(self):
         self._state = True
         if not self.simulate:

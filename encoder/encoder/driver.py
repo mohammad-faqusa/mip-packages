@@ -1,3 +1,15 @@
+class MethodWrapper:
+    def __init__(self, func):
+        self.func = func
+
+    def __getitem__(self, args):
+        if isinstance(args, (list, tuple)):
+            return self.func(*args)  # Unpack!
+        else:
+            return self.func(args)
+
+
+
 class Encoder:
     def __init__(self, pin_a, pin_b, simulate=True):
         self.pin_a = pin_a
@@ -13,6 +25,10 @@ class Encoder:
             print(f"[INIT] Encoder initialized on pins {pin_a}, {pin_b}")
         else:
             print(f"[INIT] Simulated Encoder (manual position control)")
+    
+    def __getitem__(self, key):
+        method = getattr(self, key)
+        return MethodWrapper(method)
 
     def _update_position(self, pin):
         a_val = self._a.value()
