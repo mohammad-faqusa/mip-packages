@@ -442,6 +442,22 @@
         "returns": "void",
         "purpose": "Turns the LED OFF (sets the state to OFF)"
       },
+      "switch": {
+        "type": "write",
+        "label": "Switch",
+        "returns": {
+          "dataType": "void"
+        },
+        "purpose": "Switch the led ON or OFF, according to parameter value",
+        "parameters": [
+          {
+            "name": "status",
+            "dataType": "Boolean",
+            "default": false,
+            "purpose": "the status boolean value, true : led on, false : led off"
+          }
+        ]
+      },
       "toggle": {
         "returns": "void",
         "purpose": "Toggles the state of the LED (ON if OFF, OFF if ON)"
@@ -514,6 +530,22 @@
       "off": {
         "returns": "void",
         "purpose": "Turns the internal LED OFF (sets the state to OFF)"
+      },
+      "switch": {
+        "type": "write",
+        "label": "Switch",
+        "returns": {
+          "dataType": "void"
+        },
+        "purpose": "Switch the led ON or OFF, according to parameter value",
+        "parameters": [
+          {
+            "name": "status",
+            "dataType": "Boolean",
+            "default": false,
+            "purpose": "the status boolean value, true : led on, false : led off"
+          }
+        ]
       },
       "toggle": {
         "returns": "void",
