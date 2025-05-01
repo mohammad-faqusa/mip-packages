@@ -16,6 +16,12 @@ class LED:
         if not self.simulate:
             self._led.value(1 if self.active_high else 0)
         print("[LED] ON")
+        
+    def switch(self, status):
+            self._state = status
+            if not self.simulate:
+                self._led.value(1 if self.active_high else 0)
+            print("[LED] ON")
 
     def off(self):
         self._state = False
