@@ -1,3 +1,6 @@
+import machine
+import math
+
 class MethodWrapper:
     def __init__(self, func):
         self.func = func
@@ -7,49 +10,39 @@ class MethodWrapper:
             return self.func(*args)  # Unpack!
         else:
             return self.func(args)
-
+        
 class Servo:
-    def __init__(self, pin, freq=50, min_us=500, max_us=2500, angle_range=180):
-        self.pin = pin
-        self.freq = freq
-        self.min_us = min_us
-        self.max_us = max_us
-        self.angle_range = angle_range
-        self._angle = 0  # current angle
-        self._pulse_us = self._angle_to_us(0)
-        print(f"[INIT] Servo(pin={pin}, freq={freq}Hz) initialized.")
-    
+    def __init__(self,pin_id,min_us=544.0,max_us=2400.0,min_deg=0.0,max_deg=180.0,freq=50):
+        self.pwm = machine.PWM(machine.Pin(pin_id))
+        self.pwm.freq(freq)
+        self.current_us = 0.0
+        self._slope = (min_us-max_us)/(math.radians(min_deg)-math.radians(max_deg))
+        self._offset = min_us
+        
     def __getitem__(self, key):
         method = getattr(self, key)
         return MethodWrapper(method)
+        
+    def write(self,deg):
+        self.write_rad(math.radians(deg))
 
-    def _angle_to_us(self, angle):
-        return self.min_us + (angle / self.angle_range) * (self.max_us - self.min_us)
-
-    def write_angle(self, angle):
-        angle = max(0, min(self.angle_range, angle))
-        self._angle = angle
-        self._pulse_us = self._angle_to_us(angle)
-        print(f"[WRITE] Angle set to {angle}° → pulse {self._pulse_us:.1f}μs")
+    def read(self):
+        return math.degrees(self.read_rad())
+        
+    def write_rad(self,rad):
+        self.write_us(rad*self._slope+self._offset)
     
-    def read_angle(self):
-        return self._angle
+    def read_rad(self):
+        return (self.current_us-self._offset)/self._slope
+        
+    def write_us(self,us):
+        self.current_us=us
+        self.pwm.duty_ns(int(self.current_us*1000.0))
     
     def read_us(self):
-        return self._pulse_us
-    def write_us(self, us):
-        us = max(self.min_us, min(self.max_us, us))
-        self._pulse_us = us
-        self._angle = ((us - self.min_us) * self.angle_range) / (self.max_us - self.min_us)
-        print(f"[WRITE] Pulse width set to {us}μs → angle {self._angle:.1f}°")
+        return self.current_us
 
-    def get_state(self):
-        return {
-            "pin": self.pin,
-            "angle": self._angle,
-            "pulse_us": self._pulse_us,
-        }
+    def off(self):
+        self.pwm.duty_ns(0)
 
-    def deinit(self):
-        print(f"[DEINIT] Servo(pin={self.pin}) deinitialized.")
 
