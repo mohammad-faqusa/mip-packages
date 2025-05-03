@@ -13,7 +13,7 @@ class MethodWrapper:
 
 
 class MotionSensor:
-    def __init__(self, pin, simulate=True):
+    def __init__(self, pin, simulate=False):
         self.pin = pin
         self.simulate = simulate
         self._motion_detected = False
