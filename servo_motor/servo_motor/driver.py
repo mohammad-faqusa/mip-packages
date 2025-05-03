@@ -31,7 +31,12 @@ class Servo:
         self._angle = angle
         self._pulse_us = self._angle_to_us(angle)
         print(f"[WRITE] Angle set to {angle}° → pulse {self._pulse_us:.1f}μs")
-
+    
+    def read_angle(self):
+        return self._angle
+    
+    def read_us(self):
+        return self._pulse_us
     def write_us(self, us):
         us = max(self.min_us, min(self.max_us, us))
         self._pulse_us = us
@@ -47,3 +52,4 @@ class Servo:
 
     def deinit(self):
         print(f"[DEINIT] Servo(pin={self.pin}) deinitialized.")
+
