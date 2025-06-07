@@ -40,9 +40,11 @@ class DHTBase:
 
 class DHTSensor(DHTBase):
     def humidity(self):
+        self.measure()
         return (self.buf[0] << 8 | self.buf[1]) * 0.1
 
     def temperature(self):
+        self.measure()
         t = ((self.buf[2] & 0x7F) << 8 | self.buf[3]) * 0.1
         if self.buf[2] & 0x80:
             t = -t
