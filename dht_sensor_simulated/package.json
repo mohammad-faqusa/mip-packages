@@ -1,0 +1,13 @@
+{
+  "version": "1.0.0",
+  "urls": [
+    [
+      "dht_sensor_simulated/__init__.py",
+      "https://raw.githubusercontent.com/mohammad0faqusa/mip-packages/main/dht_sensor_simulated/dht_sensor_simulated/__init__.py"
+    ],
+    [
+      "dht_sensor_simulated/driver.py",
+      "https://raw.githubusercontent.com/mohammad0faqusa/mip-packages/main/dht_sensor_simulated/dht_sensor_simulated/driver.py"
+    ]
+  ]
+}

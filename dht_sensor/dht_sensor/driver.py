@@ -1,4 +1,16 @@
-import random
+import sys
+import machine
+
+if hasattr(machine, "dht_readinto"):
+    from machine import dht_readinto
+elif sys.platform.startswith("esp"):
+    from esp import dht_readinto
+elif sys.platform == "pyboard":
+    from pyb import dht_readinto
+else:
+    dht_readinto = __import__(sys.platform).dht_readinto
+
+del machine
 
 class MethodWrapper:
     def __init__(self, func):
@@ -11,40 +23,32 @@ class MethodWrapper:
             return self.func(args)
 
 
-
-class DHTSensor:
-    def __init__(self, pin, sensor_type="DHT22", simulate=True):
+class DHTBase:
+    def __init__(self, pin):
         self.pin = pin
-        self.sensor_type = sensor_type
-        self.simulate = simulate
-        self._temp = 0.0
-        self._humidity = 0.0
-
-        if not self.simulate:
-            import dht
-            from machine import Pin
-            sensor_class = dht.DHT22 if self.sensor_type == "DHT22" else dht.DHT11
-            self._sensor = sensor_class(Pin(self.pin))
-
-        print(f"[INIT] {sensor_type} on pin {pin} (simulate={simulate})")
-
+        self.buf = bytearray(5)
+    
     def __getitem__(self, key):
         method = getattr(self, key)
         return MethodWrapper(method)
-    
+
     def measure(self):
-        if self.simulate:
-            self._temp = round(random.uniform(20.0, 30.0), 1)       # Simulated temp
-            self._humidity = round(random.uniform(40.0, 60.0), 1)   # Simulated humidity
-            print(f"[MEASURE] Simulated: {self._temp}°C, {self._humidity}%")
-        else:
-            self._sensor.measure()
-            self._temp = self._sensor.temperature()
-            self._humidity = self._sensor.humidity()
-            print(f"[MEASURE] Real: {self._temp}°C, {self._humidity}%")
+        buf = self.buf
+        dht_readinto(self.pin, buf)
+        if (buf[0] + buf[1] + buf[2] + buf[3]) & 0xFF != buf[4]:
+            raise Exception("checksum error")
+
+class DHTSensor(DHTBase):
+    def humidity(self):
+        return (self.buf[0] << 8 | self.buf[1]) * 0.1
 
     def temperature(self):
-        return self._temp
+        t = ((self.buf[2] & 0x7F) << 8 | self.buf[3]) * 0.1
+        if self.buf[2] & 0x80:
+            t = -t
+        return t
 
-    def humidity(self):
-        return self._humidity
+
+__version__ = '0.1.0'
+
+
