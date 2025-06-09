@@ -1,50 +1,30 @@
-import random
-import time
-
-class MethodWrapper:
-    def __init__(self, func):
-        self.func = func
-
-    def __getitem__(self, args):
-        if isinstance(args, (list, tuple)):
-            return self.func(*args)  # Unpack!
-        else:
-            return self.func(args)
+# sensors.py
+import machine, time
+from edge_detector import EdgeDetector
 
 
-class MotionSensor:
-    def __init__(self, pin, simulate=False):
-        self.pin = pin
-        self.simulate = simulate
-        self._motion_detected = False
+class PIRSensor(EdgeDetector):
+    """
+    Passive-infrared motion sensor.
+    Delivers True on the HIGH pulse (motion) and False when it returns LOW.
+    """
+    MOTION = True
+    IDLE   = False
 
-        if not self.simulate:
-            from machine import Pin
-            self._pir = Pin(pin, Pin.IN)
+    def __init__(self, pin_num, *, callback=None):
+        # Most PIR modules use active-high output; no pull resistor needed.
+        super().__init__(pin_num, pull=None)
+        if callback:
+            self.set_callback(callback)
 
-        print(f"[INIT] MotionSensor on pin {pin} (simulate={simulate})")
+    # Keep base dispatch, just map semantics for clarity
+    def on_rising(self):
+        if self._callback:
+            self._callback(self.MOTION)
 
-    def __getitem__(self, key):
-        method = getattr(self, key)
-        return MethodWrapper(method)
-    
-    def read(self):
-        if self.simulate:
-            self._motion_detected = random.choice([True, False])
-            print(f"[SIMULATED READ] Motion Detected: {self._motion_detected}")
-        else:
-            self._motion_detected = bool(self._pir.value())
-            print(f"[READ] Motion Detected: {self._motion_detected}")
+    def on_falling(self):
+        if self._callback:
+            self._callback(self.IDLE)
 
-        return self._motion_detected
 
-    def wait_for_motion(self, timeout=10):
-        print(f"[WAIT] Waiting for motion for up to {timeout}s...")
-        start_time = time.time()
-        while time.time() - start_time < timeout:
-            if self.read():
-                print("[EVENT] Motion detected!")
-                return True
-            time.sleep(0.5)
-        print("[TIMEOUT] No motion detected.")
-        return False
+

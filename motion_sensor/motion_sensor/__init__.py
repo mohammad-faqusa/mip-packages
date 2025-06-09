@@ -1,1 +1,1 @@
-from .driver import MotionSensor
+from .driver import PIRSensor

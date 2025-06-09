@@ -1,70 +1,39 @@
-import time
+import machine, time
+from edge_detector import EdgeDetector
 
-class MethodWrapper:
-    def __init__(self, func):
-        self.func = func
+class PushButton(EdgeDetector):
+    """
+    Basic push-button (normally open, pulled HIGH).
+    Adds debounce and inverts logic so True = pressed.
+    """
+    PRESSED   = True
+    RELEASED  = False
 
-    def __getitem__(self, args):
-        if isinstance(args, (list, tuple)):
-            return self.func(*args)  # Unpack!
+    def __init__(self, pin_num, *,
+                 pull=machine.Pin.PULL_UP,
+                 debounce_ms=20,
+                 callback=None):
+        self._debounce_ms = debounce_ms
+        self._last_evt_ms = 0
+        super().__init__(pin_num, pull=pull)          # rising + falling IRQ
+        if callback:
+            self.set_callback(callback)
+
+    # Debounce by overriding the edge dispatcher
+    def _dispatch(self, level):
+        now = time.ticks_ms()
+        if time.ticks_diff(now, self._last_evt_ms) >= self._debounce_ms:
+            self._last_evt_ms = now
+            super()._dispatch(level)                  # let parent handle mapping
         else:
-            return self.func(args)
+            # Too soon – drop the bounce and unlock the guard
+            self._busy = 0
 
+    # Invert logic: LOW (falling) = pressed, HIGH (rising) = released
+    def on_rising(self):
+        if self._callback:
+            self._callback(self.RELEASED)
 
-class PushButton:
-    def __init__(self, pin, simulate=True, debounce_ms=50):
-        self.pin = pin
-        self.simulate = simulate
-        self.debounce_ms = debounce_ms
-        self._last_state = False
-        self._last_time = time.ticks_ms()
-        self._simulated_state = False  # Controlled manually by the user
-        self.was_pressed = False
-
-        if not self.simulate:
-            from machine import Pin
-            self._btn = Pin(pin, Pin.IN, Pin.PULL_UP)
-
-        print(f"[INIT] PushButton on pin {pin} (simulate={simulate}, debounce={debounce_ms}ms)")
-
-    def __getitem__(self, key):
-        method = getattr(self, key)
-        return MethodWrapper(method)
-
-    def set_simulated_state(self, pressed: bool):
-        """Only used in simulate=True mode to mock button press."""
-        if self.simulate:
-            self._simulated_state = pressed
-            print(f"[SIM SET] PushButton state set to: {'PRESSED' if pressed else 'RELEASED'}")
-
-    def is_pressed(self):
-        current_time = time.ticks_ms()
-
-        if self.simulate:
-            current_state = self._simulated_state
-        else:
-            current_state = not self._btn.value()  # Active LOW logic
-
-        # Debounce logic
-        if current_state != self._last_state:
-            if time.ticks_diff(current_time, self._last_time) > self.debounce_ms:
-                self._last_time = current_time
-                self._last_state = current_state
-                self.was_pressed = True
-                print(f"[DETECTED] Button {'PRESSED' if current_state else 'RELEASED'}")
-
-        return self._last_state
-    
-    def push(self):
-        self.set_simulated_state(True)
-        self.is_pressed()
-        self.set_simulated_state(False)
-        self.is_pressed()
-    
-    def get_event(self):
-        """Returns and clears the was_pressed flag."""
-        if self.was_pressed: 
-            self.was_pressed = False
-            return True
-        return False
-
+    def on_falling(self):
+        if self._callback:
+            self._callback(self.PRESSED)
