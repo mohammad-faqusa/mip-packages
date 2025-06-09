@@ -2,6 +2,7 @@
   "version": "1.0.0",
   "urls": [
     ["push_button/__init__.py", "github:mohammad0faqusa/mip-packages/push_button/push_button/__init__.py"],
-    ["push_button/driver.py", "github:mohammad0faqusa/mip-packages/push_button/push_button/driver.py"]
+    ["push_button/driver.py", "github:mohammad0faqusa/mip-packages/push_button/push_button/driver.py"],
+    ["push_button/edge_detector.py", "github:mohammad0faqusa/mip-packages/push_button/push_button/edge_detector.py"]
   ]
 }

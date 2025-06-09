@@ -8,6 +8,10 @@
     [
       "motion_sensor/driver.py",
       "https://raw.githubusercontent.com/mohammad0faqusa/mip-packages/main/motion_sensor/motion_sensor/driver.py"
+    ],
+    [
+      "motion_sensor/edge_detector.py",
+      "https://raw.githubusercontent.com/mohammad0faqusa/mip-packages/main/motion_sensor/motion_sensor/edge_detector.py"
     ]
   ]
 }
