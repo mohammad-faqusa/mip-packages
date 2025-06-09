@@ -1,6 +1,6 @@
 # sensors.py
 import machine, time
-from edge_detector import EdgeDetector
+from .edge_detector import EdgeDetector
 
 
 class PIRSensor(EdgeDetector):
