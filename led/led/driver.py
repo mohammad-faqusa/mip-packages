@@ -11,7 +11,7 @@ class MethodWrapper:
 
 
 class LED:
-    def __init__(self, pin, active_high=True, simulate=True):
+    def __init__(self, pin, active_high=True, simulate=False):
         self.pin = pin
         self.active_high = active_high
         self.simulate = simulate
