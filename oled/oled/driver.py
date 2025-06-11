@@ -29,6 +29,8 @@ class OLED(_Base):
         # temp 8×8 buffer for downsizing characters to 4×6
         self._tmp_buf = bytearray(8)                  # 8×8 / 8 = 8 bytes
         self._tmp_fb  = framebuf.FrameBuffer1(self._tmp_buf, 8, 8)
+        self.reserveMap = {}
+        self.counter = 0
 
     def __getitem__(self, key):
         method = getattr(self, key)
@@ -63,7 +65,7 @@ class OLED(_Base):
         tiny=True  → tiny 4×6 font (32 chars / row, 6-px tall rows)
         """
         char_w, char_h = (4, 6) if tiny else (8, 8)
-        max_rows       = self.height // char_h
+        max_rows = self.height // char_h
         if not 0 <= row < max_rows:
             raise ValueError(f"row must be 0–{max_rows-1}")
         y = row * char_h
@@ -81,8 +83,21 @@ class OLED(_Base):
 
     def write(self, text, row=0, *, col=1, tiny=True):
         """Clear screen, then write `text` on `row` with chosen font size."""
-        self.clear()
-        self.write_line(text, row, clear_line=False, col=col, tiny=tiny)
+        #self.clear()
+        parts = text.split(",")
+        print('this is text')
+        print('this is parts : ', parts)
+        print('this is reserve map: ', self.reserveMap)
+        if(parts[0] in self.reserveMap):
+            self.write_line(text, self.reserveMap[parts[0]] , clear_line=False, col=col, tiny=tiny) 
+        else:
+            self.reserveMap[parts[0]] = self.counter
+            self.counter = self.counter + 1
+            self.write_line(text, self.reserveMap[parts[0]] , clear_line=False, col=col, tiny=tiny) 
+        if(self.counter > 6):
+            self.reserveMap.clear()
+            self.clear()
+        
 
 
 # ───────────────── quick demo ─────────────────────────────────────────
