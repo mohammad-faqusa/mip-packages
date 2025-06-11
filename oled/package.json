@@ -1,0 +1,17 @@
+{
+  "version": "1.0.0",
+  "urls": [
+    [
+      "oled/__init__.py",
+      "github:mohammad0faqusa/mip-packages/oled/oled/__init__.py"
+    ],
+    [
+      "oled/driver.py",
+      "github:mohammad0faqusa/mip-packages/oled/oled/driver.py"
+    ],
+    [
+      "oled/ssd1306.py",
+      "github:mohammad0faqusa/mip-packages/oled/oled/ssd1306.py"
+    ]
+  ]
+}
