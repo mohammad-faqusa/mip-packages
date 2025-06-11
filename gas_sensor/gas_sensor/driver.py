@@ -1,6 +1,6 @@
 import time
 
-from edge_detector import EdgeDetector
+from .edge_detector import EdgeDetector
 import machine
 
 class GasSensor(EdgeDetector):
