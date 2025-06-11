@@ -12,8 +12,7 @@ class MethodWrapper:
             return self.func(*args)  # Unpack!
         else:
             return self.func(args)
-        
-# servo.py  –  v1.1  (adds get_angle)
+
 
 from machine import Pin, PWM
 
