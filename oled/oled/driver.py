@@ -1,8 +1,3 @@
-# oled_wrapper.py
-from .ssd1306 import SSD1306_I2C as _Base          # official driver
-from machine   import I2C, Pin
-
-
 class MethodWrapper:
     def __init__(self, func):
         self.func = func
@@ -18,52 +13,83 @@ class MethodWrapper:
             return self.func(args)
 
 
+# oled_wrapper.py  ──────────────────────────────────────────────────────
+from .ssd1306 import SSD1306_I2C as _Base       # official MicroPython driver
+from machine   import I2C, Pin
+import framebuf
+
 class OLED(_Base):
-    """SSD1306 128×64 OLED with simple text helpers.
+    """SSD1306 128×64 OLED wrapper with normal & tiny fonts."""
 
-    Example
-    -------
-    >>> from oled_wrapper import OLED
-    >>> oled = OLED()                 # no parameters needed
-    >>> oled.write("Hello OLED!")     # clear + write on first row
-    >>> oled.write_line("Row 3", 3)   # write on row 3
-    """
-
-    # ── constructor with built-in I²C init ────────────────────────────
+    # ───────────────── constructor (no args) ──────────────────────────
     def __init__(self):
-        # Default ESP32 I²C pins (change here if your wiring differs)
-        i2c = I2C(0, scl=Pin(22), sda=Pin(21))
+        i2c = I2C(0, scl=Pin(22), sda=Pin(21))        # edit pins if needed
         super().__init__(128, 64, i2c, addr=0x3C, external_vcc=False)
-    
+
+        # temp 8×8 buffer for downsizing characters to 4×6
+        self._tmp_buf = bytearray(8)                  # 8×8 / 8 = 8 bytes
+        self._tmp_fb  = framebuf.FrameBuffer1(self._tmp_buf, 8, 8)
+
     def __getitem__(self, key):
         method = getattr(self, key)
         return MethodWrapper(method)
-
-    # ── small framebuffer proxies ─────────────────────────────────────
+    
+    # ───────────────── low-level proxies ──────────────────────────────
     def fill_rect(self, x, y, w, h, col):
         self.framebuf.fill_rect(x, y, w, h, col)
 
     def clear(self):
-        """Clear the entire display and refresh."""
+        """Clear entire display and refresh."""
         self.fill(0)
         self.show()
+    
 
-    # ── convenience helpers ───────────────────────────────────────────
-    def write_line(self, text, row, *, clear_line=True, col=1):
+    # ───────────────── tiny-font renderer ─────────────────────────────
+    def _draw_char_tiny(self, ch, x, y, col=1):
+        """Render a single character at (x,y) in 4×6 pixels."""
+        self._tmp_fb.fill(0)
+        self._tmp_fb.text(ch, 0, 0, col)          # draw 8×8 glyph
+        # down-sample: take every 2nd column, first 6 rows
+        for yy in range(6):
+            for xx in range(4):
+                if self._tmp_fb.pixel(xx * 2, yy):
+                    self.pixel(x + xx, y + yy, col)
+
+    # ───────────────── high-level helpers ─────────────────────────────
+    def write_line(self, text, row, *, clear_line=True, col=1, tiny=True):
         """
-        Render `text` on ROW (0–7).  
-        Set `clear_line=False` to overwrite without erasing that row.
+        Write `text` on ROW.
+        tiny=False → normal 8×8 font (16 chars / row, 8-px tall rows)  
+        tiny=True  → tiny 4×6 font (32 chars / row, 6-px tall rows)
         """
-        if not 0 <= row < 8:                       # 64 px / 8 px per row
-            raise ValueError("row must be 0–7")
-        y = row * 8
+        char_w, char_h = (4, 6) if tiny else (8, 8)
+        max_rows       = self.height // char_h
+        if not 0 <= row < max_rows:
+            raise ValueError(f"row must be 0–{max_rows-1}")
+        y = row * char_h
+
         if clear_line:
-            self.fill_rect(0, y, self.width, 8, 0)
-        self.text(text, 0, y, col)
+            self.fill_rect(0, y, self.width, char_h, 0)
+
+        if tiny:
+            for i, ch in enumerate(text[: self.width // char_w]):
+                self._draw_char_tiny(ch, i * char_w, y, col)
+        else:
+            self.text(text[: self.width // char_w], 0, y, col)
+
         self.show()
 
-    def write(self, text, row=0, *, col=1):
-        """Clear full screen, then write `text` on `row` (default = 0)."""
+    def write(self, text, row=0, *, col=1, tiny=True):
+        """Clear screen, then write `text` on `row` with chosen font size."""
         self.clear()
-        self.write_line(text, row, clear_line=False, col=col)
+        self.write_line(text, row, clear_line=False, col=col, tiny=tiny)
+
+
+# ───────────────── quick demo ─────────────────────────────────────────
+if __name__ == "__main__":
+    oled = OLED()
+
+    oled.write("Normal font demo", row=0)          # 8×8 font (16 chars)
+    oled.write_line("Tiny font: 32 chars here ->", 2, tiny=True)
+    oled.write_line("0123456789ABCDEF0123456789AB", 3, tiny=True)
 
