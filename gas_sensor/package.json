@@ -8,6 +8,10 @@
     [
       "gas_sensor/driver.py",
       "https://raw.githubusercontent.com/mohammad0faqusa/mip-packages/main/gas_sensor/gas_sensor/driver.py"
+    ],
+    [
+      "gas_sensor/edge_detector.py",
+      "https://raw.githubusercontent.com/mohammad0faqusa/mip-packages/main/gas_sensor/gas_sensor/edge_detector.py"
     ]
   ]
 }

@@ -1,43 +1,41 @@
-import random
+import time
 
-class MethodWrapper:
-    def __init__(self, func):
-        self.func = func
+from edge_detector import EdgeDetector
+import machine
 
-    def __getitem__(self, args):
-        if isinstance(args, (list, tuple)):
-            return self.func(*args)  # Unpack!
+class GasSensor(EdgeDetector):
+    """
+    Basic push-button (normally open, pulled HIGH).
+    Adds debounce and inverts logic so True = pressed.
+    """
+    PRESSED   = True
+    RELEASED  = False
+
+    def __init__(self, pin_num, *,
+                 pull=machine.Pin.PULL_UP,
+                 debounce_ms=20,
+                 callback=None):
+        self._debounce_ms = debounce_ms
+        self._last_evt_ms = 0
+        super().__init__(pin_num, pull=pull)          # rising + falling IRQ
+        if callback:
+            self.set_callback(callback)
+
+    # Debounce by overriding the edge dispatcher
+    def _dispatch(self, level):
+        now = time.ticks_ms()
+        if time.ticks_diff(now, self._last_evt_ms) >= self._debounce_ms:
+            self._last_evt_ms = now
+            super()._dispatch(level)                  # let parent handle mapping
         else:
-            return self.func(args)
+            # Too soon – drop the bounce and unlock the guard
+            self._busy = 0
 
+    # Invert logic: LOW (falling) = pressed, HIGH (rising) = released
+    def on_rising(self, fn):
+        if self._callback:
+            self._callback(fn)
 
-
-class GasSensor:
-    def __init__(self, pin, analog=True, simulate=True):
-        self.pin = pin
-        self.analog = analog
-        self.simulate = simulate
-        self._gas_level = 0
-
-        if not self.simulate and not analog:
-            from machine import Pin
-            self._sensor = Pin(pin, Pin.IN)
-        elif not self.simulate and analog:
-            from machine import ADC, Pin
-            self._sensor = ADC(Pin(pin))
-
-        print(f"[INIT] GasSensor on pin {pin} (analog={analog}, simulate={simulate})")
-
-    def __getitem__(self, key):
-        method = getattr(self, key)
-        return MethodWrapper(method)
-    
-    def read(self):
-        if self.simulate:
-            self._gas_level = random.randint(0, 1023) if self.analog else random.choice([0, 1])
-            print(f"[SIMULATED READ] Gas Level: {self._gas_level}")
-        else:
-            self._gas_level = self._sensor.read() if self.analog else self._sensor.value()
-            print(f"[READ] Gas Level: {self._gas_level}")
-
-        return self._gas_level
+    def on_falling(self, fn):
+        if self._callback:
+            self._callback(fn)
