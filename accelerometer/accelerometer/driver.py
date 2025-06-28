@@ -82,6 +82,10 @@ class MPU6050(object):
         self._last_gyro = None
         self._last_angle = None
         self._monitoring = False
+        self._accel_threshold = 0.5     # m/s²
+        self._gyro_threshold = 2.0      # deg/s
+        self._angle_threshold = 0.05    # radians (~2.8°)
+
 
         
         # Initializing the I2C method for ESP32
@@ -274,24 +278,37 @@ class MPU6050(object):
 
     def _trigger_on_change(self, key, value):
         if self._on_state_change:
-            self._on_state_change(key, value)
+            self._on_state_change('accelerometer', [key, value])
 
+    def _is_significant_change(self, new, old, threshold):
+        if old is None:
+            return True
+        for axis in ['x', 'y', 'z']:
+            if axis in new and axis in old:
+                if abs(new[axis] - old[axis]) > threshold:
+                    return True
+        return False
+
+
+    
     async def _monitor_values(self):
         while True:
-            await asyncio.sleep_ms(200)  # Non-blocking delay
+            await asyncio.sleep_ms(1000)
 
             accel = self.read_accel_data()
-            if accel != self._last_accel:
+            if self._is_significant_change(accel, self._last_accel, self._accel_threshold):
                 self._last_accel = accel
                 self._trigger_on_change('accel', accel)
 
             gyro = self.read_gyro_data()
-            if gyro != self._last_gyro:
+            if self._is_significant_change(gyro, self._last_gyro, self._gyro_threshold):
                 self._last_gyro = gyro
                 self._trigger_on_change('gyro', gyro)
 
             angle = self.read_angle()
-            if angle != self._last_angle:
+            if self._is_significant_change(angle, self._last_angle, self._angle_threshold):
                 self._last_angle = angle
                 self._trigger_on_change('angle', angle)
+
+
 
