@@ -6,6 +6,8 @@
 from math import sqrt, atan2
 from machine import Pin, SoftI2C
 from time import sleep_ms
+import uasyncio as asyncio
+
 
 error_msg = "\nError \n"
 i2c_err_str = "ESP32 could not communicate with module at address 0x{:02X}, check wiring"
@@ -75,6 +77,12 @@ class MPU6050(object):
         # Checks any erorr would happen with I2C communication protocol.
         self._failCount = 0
         self._terminatingFailCount = 0
+        self._on_state_change = None
+        self._last_accel = None
+        self._last_gyro = None
+        self._last_angle = None
+        self._monitoring = False
+
         
         # Initializing the I2C method for ESP32
         # Pin assignment:
@@ -256,3 +264,34 @@ class MPU6050(object):
         x=atan2(a["y"],a["z"])
         y=atan2(-a["x"],a["z"])
         return {"x": x, "y": y}
+
+    def watch_state(self, callback):
+        """Register a unified callback for any change."""
+        self._on_state_change = callback
+        if not self._monitoring:
+            self._monitoring = True
+            asyncio.create_task(self._monitor_values())
+
+    def _trigger_on_change(self, key, value):
+        if self._on_state_change:
+            self._on_state_change(key, value)
+
+    async def _monitor_values(self):
+        while True:
+            await asyncio.sleep_ms(200)  # Non-blocking delay
+
+            accel = self.read_accel_data()
+            if accel != self._last_accel:
+                self._last_accel = accel
+                self._trigger_on_change('accel', accel)
+
+            gyro = self.read_gyro_data()
+            if gyro != self._last_gyro:
+                self._last_gyro = gyro
+                self._trigger_on_change('gyro', gyro)
+
+            angle = self.read_angle()
+            if angle != self._last_angle:
+                self._last_angle = angle
+                self._trigger_on_change('angle', angle)
+
