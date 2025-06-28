@@ -16,7 +16,8 @@ class LED:
         self.active_high = active_high
         self.simulate = simulate
         self._state = False  # LED is initially off
-
+        self._on_change = None  # NEW: callback for state changes
+        
         if not self.simulate:
             from machine import Pin
             self._led = Pin(pin, Pin.OUT)
@@ -28,28 +29,30 @@ class LED:
         return MethodWrapper(method)
     
     def on(self):
-        self._state = True
-        if not self.simulate:
-            self._led.value(1 if self.active_high else 0)
-        print("[LED] ON")
-        
-    def switch(self, status):
-            self._state = status
-            if not self.simulate:
-                self._led.value(1 if self._state else 0)
-            print("[LED] ON")
+        self._trigger_if_changed(True)
 
     def off(self):
-        self._state = False
-        if not self.simulate:
-            self._led.value(0 if self.active_high else 1)
-        print("[LED] OFF")
+        self._trigger_if_changed(False)
+
+    def switch(self, status):
+        self._trigger_if_changed(bool(status))
 
     def toggle(self):
-        if self._state:
-            self.off()
-        else:
-            self.on()
+        self._trigger_if_changed(not self._state)
 
     def is_on(self):
         return self._state
+
+    def watch_state(self, callback):
+        """Set a callback to trigger when LED state changes."""
+        self._on_change = callback
+
+    def _trigger_if_changed(self, new_state):
+        if new_state != self._state:
+            self._state = new_state
+            if not self.simulate:
+                self._led.value(1 if self._state == self.active_high else 0)
+            if self._on_change:
+                self._on_change("led", ("state", self._state))
+            print(f"[LED] {'ON' if self._state else 'OFF'} (triggered)")
+
