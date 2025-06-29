@@ -16,24 +16,15 @@ class PushButton(EdgeDetector):
         self._debounce_ms = debounce_ms
         self._last_evt_ms = 0
         super().__init__(pin_num, pull=pull)          # rising + falling IRQ
-        if callback:
-            self.set_callback(callback)
 
-    # Debounce by overriding the edge dispatcher
     def _dispatch(self, level):
         now = time.ticks_ms()
-        if time.ticks_diff(now, self._last_evt_ms) >= self._debounce_ms:
-            self._last_evt_ms = now
-            super()._dispatch(level)                  # let parent handle mapping
-        else:
-            # Too soon – drop the bounce and unlock the guard
-            self._busy = 0
+        if time.ticks_diff(now, self._last_evt_ms) < self._debounce_ms:
+            return  # Ignore bouncing
+        self._last_evt_ms = now
 
-    # Invert logic: LOW (falling) = pressed, HIGH (rising) = released
-    def on_rising(self):
-        if self._callback:
-            self._callback(self.RELEASED)
-
-    def on_falling(self):
-        if self._callback:
-            self._callback(self.PRESSED)
+        if self._watch_state:
+            try:
+                self._watch_state("button", {"pressed": bool(level)})
+            except Exception as exc:
+                print("PushButton watch_state error:", exc)

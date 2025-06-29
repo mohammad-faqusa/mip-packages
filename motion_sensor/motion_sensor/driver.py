@@ -1,30 +1,23 @@
 # sensors.py
-import machine, time
+import machine
 from .edge_detector import EdgeDetector
-
 
 class PIRSensor(EdgeDetector):
     """
     Passive-infrared motion sensor.
-    Delivers True on the HIGH pulse (motion) and False when it returns LOW.
+    Calls watch_state("pir", {"motion": True}) on motion detected,
+    and {"motion": False} when motion ends.
     """
     MOTION = True
-    IDLE   = False
+    IDLE = False
 
-    def __init__(self, pin_num, *, callback=None):
-        # Most PIR modules use active-high output; no pull resistor needed.
-        super().__init__(pin_num, pull=None)
-        if callback:
-            self.set_callback(callback)
+    def __init__(self, pin_num, *, watch_state=None):
+        # PIR modules typically output active-high and don't need internal pull resistors
+        super().__init__(pin_num, pull=None, watch_state=watch_state)
 
-    # Keep base dispatch, just map semantics for clarity
-    def on_rising(self):
-        if self._callback:
-            self._callback(self.MOTION)
-
-    def on_falling(self):
-        if self._callback:
-            self._callback(self.IDLE)
-
-
-
+    def _dispatch(self, level):
+        if self._watch_state:
+            try:
+                self._watch_state("pir", {"motion": bool(level)})
+            except Exception as exc:
+                print("PIRSensor watch_state error:", exc)

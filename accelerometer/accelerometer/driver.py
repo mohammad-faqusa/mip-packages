@@ -278,7 +278,7 @@ class MPU6050(object):
 
     def _trigger_on_change(self, key, value):
         if self._on_state_change:
-            self._on_state_change('accelerometer', [key, value])
+            self._on_state_change('accelerometer', {key: value})
 
     def _is_significant_change(self, new, old, threshold):
         if old is None:

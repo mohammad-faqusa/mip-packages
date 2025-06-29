@@ -61,7 +61,7 @@ class DHTSensor(DHTBase):
         if self._last_values.get(key) != value:
             self._last_values[key] = value
             if self._on_state_change:
-                self._on_state_change("dht_sensor", (key, value))
+                self._on_state_change("dht_sensor", {key: value})
 
     def watch_state(self, callback, interval=5):
         """Set the callback and start the watch loop."""

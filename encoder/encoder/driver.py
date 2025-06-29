@@ -74,7 +74,7 @@ class Encoder:
 
         if new_pos != self._pos:
             self._pos = new_pos
-            update = ("angle", self._pos)
+            update = {"angle": self._pos}
             try:
                 if self._watch_state:
                     self._watch_state("encoder", update)
