@@ -57,7 +57,7 @@ class Encoder:
     def get_position(self) -> int:
         return self._pos
 
-    def set_watch_state(self, func):
+    def watch_state(self, func):
         self._watch_state = func
 
     def _irq(self, pin):
